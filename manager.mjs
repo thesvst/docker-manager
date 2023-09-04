@@ -1,6 +1,10 @@
+#!/usr/bin/env node
 import inquirer from 'inquirer';
 import { exec, spawn } from 'child_process';
 import os from 'os';
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 class DockerManager {
     constructor() {
@@ -12,22 +16,22 @@ class DockerManager {
             mainChoice: {
                 type: 'list',
                 name: 'mainChoice',
-                message: 'What do you want to do:',
+                message: 'What to do?',
                 choices: [
                     'Run Docker',
-                    'Install Docker (only Ubuntu, preferred 22.04)',
-                    'Remove Docker containers',
-                    'Remove Docker images',
-                    'Remove docker unused resources',
+                    'Manage containers',
+                    'Manage images',
                     'Attach to a container',
                     'Enter container bash',
+                    'Install Docker (only Ubuntu, preferred 22.04)',
+                    'Prune',
                     'Exit'
                 ],
             },
-            removeDockerContainers: {
+            manageDockerContainers: {
                 type: 'list',
                 name: 'containerAction',
-                message: 'Which containers you would like to manage?',
+                message: 'What to do?',
                 choices: [
                     'Remove all containers',
                     'Remove all stopped containers',
@@ -37,9 +41,9 @@ class DockerManager {
             },
             runDocker: {
                 type: 'list',
-                name: 'environment',
-                message: 'Select environment:',
-                choices: ['Local', 'Production'],
+                name: 'app',
+                message: 'Select app:',
+                choices: ['Web', 'API', 'Engine (soon)', 'Client (soon)'],
             }
         };
     }
@@ -69,7 +73,7 @@ class DockerManager {
             spawnedProcess.on('close', (code) => {
                 if (code === 0) {
                     console.log(`Process finished`);
-                    resolve(outputData.trim());  // trim() removes any trailing newline or whitespace.
+                    resolve(outputData.trim());
                 } else {
                     reject(new Error(`Process exited with code: ${code}`));
                 }
@@ -160,20 +164,22 @@ class DockerManager {
     }
     
     async runDocker() {
-        const { environment } = await inquirer.prompt(this.choices.runDocker);
+        const { app } = await inquirer.prompt(this.choices.runDocker);
         const scriptMap = {
-            'Local': 'npm run docker:develop',
-            'Production': 'npm run docker',
+            Web: `npm run start:local --prefix ${process.env.WEB_DIR_PATH}`,
+            API: `npm run start:local --prefix ${process.env.API_DIR_PATH}`,
+            Engine: ``,
+            Clinet: ``,
         };
     
-        const dockerCommand = scriptMap[environment];
+        const dockerCommand = scriptMap[app];
         const commandToRun = `newgrp docker <<EOL\n${dockerCommand}\nEOL`;
     
         const [command, ...args] = commandToRun.split(' ');
-        await this.executeCommandWithOutput(command, args, true); // Notice the `true` argument to use a shell
+        await this.executeCommandWithOutput(command, args, true);
     }
-    async removeDockerContainers() {
-        const { containerAction } = await inquirer.prompt(this.choices.removeDockerContainers);
+    async manageDockerContainers() {
+        const { containerAction } = await inquirer.prompt(this.choices.manageDockerContainers);
         switch (containerAction) {
             case 'Remove all containers': {
                 const containerNames = await this.getContainerNames();
@@ -218,21 +224,21 @@ class DockerManager {
         }
     }
 
-    async removeDockerImages() {
+    async manageDockerImages() {
         const answers = await inquirer.prompt({
             type: 'list',
-            name: 'removeDockerImagesMainChoice',
+            name: 'manageDockerImagesMainChoice',
             message: 'Which images would you like to remove?',
             choices: [
-                'All images',
-                'Dangling images',
-                'Specified images (you provide names)',
+                'Remove all images',
+                'Remove Dangling images',
+                'Remove Specified images (you provide names)',
                 'Back to main menu'
             ],
         });
 
-        switch (answers.removeDockerImagesMainChoice) {
-            case 'All images': {
+        switch (answers.manageDockerImagesMainChoice) {
+            case 'Remove all images': {
                 const names = await this.executeCommand(`docker images --format '{{.Repository}}:{{.Tag}}' | paste -sd ","`);
                 if (!names) {
                     console.error('There are no images!')
@@ -246,7 +252,7 @@ class DockerManager {
 
             }
 
-            case 'Dangling images': {
+            case 'Remove Dangling images': {
                 const names = await this.executeCommand(`docker images -f "dangling=true" --format '{{.Repository}}:{{.Tag}}' | paste -sd ","`);
                 if (names.length === 0 ) {
                     console.log('There are no dangling images!');
@@ -262,7 +268,7 @@ class DockerManager {
                 break;
             }
                 
-            case 'Specified images (you provide names)':
+            case 'Remove Specified images (you provide names)':
                 const imageNames = await this.executeCommand(`docker images --format '{{.Repository}}:{{.Tag}}' | paste -sd ","`);
                 if (!imageNames) {
                     console.error('There are no images!');
@@ -330,13 +336,13 @@ class DockerManager {
             case 'Install Docker (only Ubuntu, preferred 22.04)':
                 await this.installDocker();
                 break;
-            case 'Remove Docker containers':
-                await this.removeDockerContainers();
+            case 'Manage containers':
+                await this.manageDockerContainers();
                 break;
-            case 'Remove Docker images':
-                await this.removeDockerImages();
+            case 'Manage images':
+                await this.manageDockerImages();
                 break;
-            case 'Remove docker unused resources':
+            case 'Prune':
                 await this.removeDockerUnusedResources();
                 break;
             case 'Attach to a container':
