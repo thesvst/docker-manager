@@ -2,9 +2,15 @@
 import inquirer from 'inquirer';
 import { exec, spawn } from 'child_process';
 import os from 'os';
-import dotenv from 'dotenv'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import dotenv from 'dotenv';
 
-dotenv.config()
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const envPath = `${__dirname}/.env`;
+dotenv.config({ path: envPath });
 
 class DockerManager {
     constructor() {
