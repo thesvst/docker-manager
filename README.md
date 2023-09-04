@@ -12,3 +12,6 @@ npm link
 ```
 
 Run globally
+```
+dckr
+```
