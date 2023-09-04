@@ -36,6 +36,7 @@ class DockerManager {
                     'Remove all containers',
                     'Remove all stopped containers',
                     'Remove specific containers',
+                    'List containers',
                     'Back to main menu'
                 ],
             },
@@ -63,13 +64,13 @@ class DockerManager {
     async executeCommandCopyOutput(command, args, shell = false) {
         return new Promise((resolve, reject) => {
             const spawnedProcess = spawn(command, args, { stdio: [process.stdin, 'pipe', process.stderr], shell });
-            
+
             let outputData = '';
-    
+
             spawnedProcess.stdout.on('data', (data) => {
                 outputData += data.toString();
             });
-    
+
             spawnedProcess.on('close', (code) => {
                 if (code === 0) {
                     console.log(`Process finished`);
@@ -80,12 +81,12 @@ class DockerManager {
             });
         });
     }
-    
+
 
     async executeCommandWithOutput(command, args, shell = false) {
         return new Promise((resolve, reject) => {
             const spawnedProcess = spawn(command, args, { stdio: 'inherit', shell });
-    
+
             spawnedProcess.on('close', (code) => {
                 if (code === 0) {
                     console.log(`Process finished`);
@@ -96,7 +97,7 @@ class DockerManager {
             });
         });
     }
-    
+
 
     async getContainerNames() {
         const names = await this.executeCommand(`docker ps --format '{{.Names}}' | paste -sd ","`);
@@ -139,30 +140,30 @@ class DockerManager {
 
         console.log('Upgrading system packages...')
         await this.executeCommandWithOutput('sudo', ['apt-get', 'upgrade', '-y']);
-        
+
         console.log('Installing Docker...');
         await this.executeCommandWithOutput('sudo', ['apt-get', 'install', '-y', 'ca-certificates', 'curl', 'gnupg']);
         await this.executeCommandWithOutput('sudo', ['install', '-m', '0755', '-d', '/etc/apt/keyrings']);
         await this.executeCommandWithOutput('curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg', [], true);
         await this.executeCommandWithOutput('sudo', ['chmod', 'a+r', '/etc/apt/keyrings/docker.gpg']);
-    
+
         const architecture = await this.executeCommandCopyOutput('dpkg', ['--print-architecture']);
         const versionCodeName = await this.executeCommandCopyOutput('bash', ['-c', '. /etc/os-release && echo "$VERSION_CODENAME"']);
         const repositoryCommand = `echo "deb [arch=${architecture} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu ${versionCodeName} stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`;
         await this.executeCommandWithOutput('bash', ['-c', repositoryCommand]);
-    
+
         await this.executeCommandWithOutput('sudo', ['apt-get', 'update', '-y']);
         await this.executeCommandWithOutput('sudo', ['apt-get', 'install', '-y', 'docker-ce', 'docker-ce-cli', 'containerd.io', 'docker-buildx-plugin', 'docker-compose-plugin']);
-    
+
         console.log('Installing Docker Compose...');
         await this.executeCommandWithOutput('sudo', ['apt-get', 'install', '-y', 'docker-compose']);
-    
+
         console.log('Configuring Docker group...');
         await this.executeCommandWithOutput('sudo', ['usermod', '-aG', 'docker', process.env.USER]);
         console.log('Docker installation and configuration complete!');
         return;
     }
-    
+
     async runDocker() {
         const { app } = await inquirer.prompt(this.choices.runDocker);
         const scriptMap = {
@@ -171,10 +172,10 @@ class DockerManager {
             Engine: ``,
             Clinet: ``,
         };
-    
+
         const dockerCommand = scriptMap[app];
         const commandToRun = `newgrp docker <<EOL\n${dockerCommand}\nEOL`;
-    
+
         const [command, ...args] = commandToRun.split(' ');
         await this.executeCommandWithOutput(command, args, true);
     }
@@ -193,7 +194,7 @@ class DockerManager {
             }
             case 'Remove all stopped containers':
                 const names = await this.executeCommand(`docker ps -a --filter "status=exited" --format '{{.Names}}' | paste -sd ","`);
-                if (names.length === 0 ) {
+                if (names.length === 0) {
                     console.log('There are no stopped containers!');
                     return;
                 }
@@ -219,6 +220,10 @@ class DockerManager {
                     await this.executeCommand(`docker rm ${container}`);
                 }
                 break;
+            case 'List containers': {
+                await this.executeCommandWithOutput('docker', ['container', 'ls', '-a']);
+                break;
+            }
             case 'Back to main menu':
                 return
         }
@@ -233,6 +238,7 @@ class DockerManager {
                 'Remove all images',
                 'Remove Dangling images',
                 'Remove Specified images (you provide names)',
+                'List images',
                 'Back to main menu'
             ],
         });
@@ -244,8 +250,8 @@ class DockerManager {
                     console.error('There are no images!')
                     return;
                 }
-                await this.executeCommand('docker stop -f $(docker ps -q)');
-                await this.executeCommand('docker rm -f $(docker ps -a -q)');
+                await this.executeCommand('docker stop $(docker ps -q)');
+                await this.executeCommand('docker rm $(docker ps -aq)');
                 await this.executeCommand('docker rmi -f $(docker images -aq)');
                 console.log('All images have been deleted');
                 break;
@@ -254,20 +260,19 @@ class DockerManager {
 
             case 'Remove Dangling images': {
                 const names = await this.executeCommand(`docker images -f "dangling=true" --format '{{.Repository}}:{{.Tag}}' | paste -sd ","`);
-                if (names.length === 0 ) {
+                if (names.length === 0) {
                     console.log('There are no dangling images!');
                     return;
                 }
                 names.split(',').forEach(async (name) => {
-                    
-                    await this.executeCommand(`docker rm ${name}`);
+                    await this.executeCommand(`docker rmi ${name}`);
                 })
 
                 console.log('All dangling images have been deleted');
-                await this.executeCommandWithOutput('docker', ['image', 'ls']);
+                await this.executeCommandWithOutput('docker', ['image', 'ls', '-a']);
                 break;
             }
-                
+
             case 'Remove Specified images (you provide names)':
                 const imageNames = await this.executeCommand(`docker images --format '{{.Repository}}:{{.Tag}}' | paste -sd ","`);
                 if (!imageNames) {
@@ -288,6 +293,11 @@ class DockerManager {
                 console.log('Your images after removal:');
                 await this.executeCommandWithOutput('docker', ['image', 'ls']);
                 break;
+
+            case 'List images': {
+                await this.executeCommandWithOutput('docker', ['image', 'ls', '-a']);
+                break;
+            }
 
             case 'Exit':
                 return;
