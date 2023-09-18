@@ -1,14 +1,14 @@
 {
-  "name": "mrcnsvstia-docker-manager",
+  "name": "docker-manager",
   "version": "1.0.0",
   "description": "",
-  "main": "manager.mjs",
+  "main": "index.mjs",
   "bin": {
-    "dckr": "./manager.mjs"
+    "dckr": "./index.mjs"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./manager.mjs"
+    "start": "node ./index.mjs"
   },
   "keywords": [],
   "author": "",
