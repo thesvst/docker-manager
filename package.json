@@ -8,13 +8,18 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./index.mjs"
+    "start": "npx ts-node ./index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.3.1",
-    "inquirer": "^9.2.10"
+    "inquirer": "^9.2.11"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
   }
 }
