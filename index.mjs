@@ -373,5 +373,5 @@ class DockerManager {
     }
 }
 
-const DockerManagerInstance = new DockerManager();
-DockerManagerInstance.run();
+const dockerManager = new DockerManager();
+dockerManager.run();
