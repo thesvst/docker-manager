@@ -8,6 +8,15 @@ import { AppManager } from "./AppManager";
 import { select } from '@inquirer/prompts';
 
 class DockerManager extends CliManager {
+    private readonly containersManager: ContainersManager
+    private readonly imagesManager: ImagesManager
+
+    constructor(containersManager: ContainersManager, imagesManager: ImagesManager) {
+        super();
+        this.containersManager = containersManager;
+        this.imagesManager = imagesManager;
+    }
+
     private async setEnvVariables() {
         const env = Object.create(process.env);
         env.PATH = `${env.PATH}:/usr/bin:/usr/sbin`;
@@ -55,20 +64,23 @@ class DockerManager extends CliManager {
     private async manageContainers(): Promise<void> {
         const choicer = new Choicer<ManageContainersActions>('list', 'initial', 'What to do?', Object.keys(ManageContainersActions) as ManageContainersActions[]);
         const data = await select(choicer.inqSelectConfig)
-        const containersManager = new ContainersManager();
 
         switch(data) {
             case ManageContainersActions.Start: {
-                await containersManager.start()
+                await this.containersManager.start()
+                break;
             }
             case ManageContainersActions.List: {
-                await containersManager.list()
+                await this.containersManager.list()
+                break;
             }
             case ManageContainersActions.Remove: {
-                await containersManager.remove()
+                await this.containersManager.remove()
+                break;
             }
             case ManageContainersActions.Stop: {
-                await containersManager.stop()
+                await this.containersManager.stop()
+                break;
             }
         }
     }
@@ -76,20 +88,23 @@ class DockerManager extends CliManager {
     private async manageImages(): Promise<void> {
         const choicer = new Choicer<ManageImagesActions>('list', 'initial', 'What to do?', Object.keys(ManageImagesActions) as ManageImagesActions[]);
         const data = await select(choicer.inqSelectConfig)
-        const imagesManager = new ImagesManager();
 
         switch(data) {
             case ManageImagesActions.Start: {
-                await imagesManager.start()
+                await this.imagesManager.start()
+                break;
             }
             case ManageImagesActions.List: {
-                await imagesManager.start()
+                await this.imagesManager.start()
+                break;
             }
             case ManageImagesActions.Remove: {
-                await imagesManager.start()
+                await this.imagesManager.start()
+                break;
             }
             case ManageImagesActions.Stop: {
-                await imagesManager.start()
+                await this.imagesManager.start()
+                break;
             }
         }
     }
@@ -101,10 +116,12 @@ class DockerManager extends CliManager {
         switch(data) {
             case ManageActions.Containers: {
                 await this.manageContainers()
+                break;
             }
 
             case ManageActions.Images: {
                 await this.manageImages()
+                break;
             }
         }
     }
@@ -122,11 +139,7 @@ class DockerManager extends CliManager {
         }
     }
 
-    private async getContainerNames(): Promise<string[]> {
-        const names = await this.executeCommand(`docker ps --format '{{.Names}}' | paste -sd ","`) as string;
-        if (names.length === 0) return []
-        return names.split(',');
-    }
+
 
     async selectFromList(message: string, choices: string[]) {
         const data = await select({ message, choices: choices.map((choice) => ({ value: choice, message: choice})) })
@@ -134,7 +147,7 @@ class DockerManager extends CliManager {
     }
 
     private async attach(): Promise<void> {
-        const containerNames = await this.getContainerNames();
+        const containerNames = await this.containersManager.getContainerNames();
         if (!containerNames.length) {
             console.error('No running containers found.');
             return;
@@ -151,22 +164,27 @@ class DockerManager extends CliManager {
         switch(data) {
             case MainActions.RunApp: {
                 await this.runApp();
+                break;
             }
 
             case MainActions.Install: {
                 await this.installDocker();
+                break;
             }
 
             case MainActions.Manage: {
                 await this.manage();
+                break;
             }
 
             case MainActions.Attach: {
                 await this.attach();
+                break;
             }
 
             case MainActions.Prune: {
                 await this.prune();
+                break;
             }
 
             case MainActions.Exit: {
@@ -177,5 +195,5 @@ class DockerManager extends CliManager {
     }
 }
 
-const dockerManager = new DockerManager();
+const dockerManager = new DockerManager(new ContainersManager(), new ImagesManager());
 dockerManager.run();
