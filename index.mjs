@@ -1,16 +1,9 @@
 #!/usr/bin/env node
 import inquirer from 'inquirer';
-import { exec, spawn } from 'child_process';
 import os from 'os';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import dotenv from 'dotenv';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const envPath = `${__dirname}/.env`;
-dotenv.config({ path: envPath });
+dotenv.config();
 
 class DockerManager {
     constructor() {
@@ -132,7 +125,7 @@ class DockerManager {
             Clinet: ``,
         };
 
-        const dockerCommand = scriptMap[app];
+        const dockerCommand = 'npm run start:local --prefix ${process.env.WEB_DIR_PATH}';
         const commandToRun = `newgrp docker <<EOL\n${dockerCommand}\nEOL`;
 
         const [command, ...args] = commandToRun.split(' ');
