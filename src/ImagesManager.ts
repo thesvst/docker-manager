@@ -1,7 +1,7 @@
 import { checkbox, select } from "@inquirer/prompts";
 import { Choicer } from "./Choicer";
 import { CliManager } from "./CliManager";
-import { ImagesRemoveActions } from "./types";
+import { ImagesRemoveActions } from "../types";
 
 export class ImagesManager extends CliManager{
     public async list() {
@@ -10,7 +10,7 @@ export class ImagesManager extends CliManager{
     }
 
     public async remove() {
-        const choicer = new Choicer<ImagesRemoveActions>('list', 'data', 'What to do?', Object.keys(ImagesRemoveActions) as ImagesRemoveActions[]);
+        const choicer = new Choicer<ImagesRemoveActions>('What to do?', Object.keys(ImagesRemoveActions) as ImagesRemoveActions[]);
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {

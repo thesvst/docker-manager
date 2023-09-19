@@ -1,10 +1,11 @@
-import { Choicer } from "./Choicer";
-import { CliManager } from "./CliManager";
+#!/usr/bin/env node
+import { Choicer } from "./src/Choicer";
+import { CliManager } from "./src/CliManager";
 import { MainActions, ManageActions, ManageContainersActions, ManageImagesActions } from "./types";
 import os from 'os';
-import { ContainersManager } from "./ContainersManager";
-import { ImagesManager } from "./ImagesManager";
-import { AppManager } from "./AppManager";
+import { ContainersManager } from "./src/ContainersManager";
+import { ImagesManager } from "./src/ImagesManager";
+import { AppManager } from "./src/AppManager";
 import { select } from '@inquirer/prompts';
 import dotenv from 'dotenv';
 
@@ -67,7 +68,7 @@ class DockerManager extends CliManager {
     }
 
     private async manageContainers(): Promise<void> {
-        const choicer = new Choicer<ManageContainersActions>('list', 'initial', 'What to do?', Object.keys(ManageContainersActions) as ManageContainersActions[]);
+        const choicer = new Choicer<ManageContainersActions>('What to do?', Object.keys(ManageContainersActions) as ManageContainersActions[]);
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {
@@ -91,7 +92,7 @@ class DockerManager extends CliManager {
     }
 
     private async manageImages(): Promise<void> {
-        const choicer = new Choicer<ManageImagesActions>('list', 'initial', 'What to do?', Object.keys(ManageImagesActions) as ManageImagesActions[]);
+        const choicer = new Choicer<ManageImagesActions>('What to do?', Object.keys(ManageImagesActions) as ManageImagesActions[]);
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {
@@ -107,7 +108,7 @@ class DockerManager extends CliManager {
     }
 
     private async manage(): Promise<void> {
-        const choicer = new Choicer<ManageActions>('list', 'data', 'What to do?', Object.keys(ManageActions) as ManageActions[]);
+        const choicer = new Choicer<ManageActions>('What to do?', Object.keys(ManageActions) as ManageActions[]);
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {
@@ -125,7 +126,7 @@ class DockerManager extends CliManager {
 
     private async runApp(): Promise<void> {
         const list = this.appManager.appNames;
-        const choicer = new Choicer<string>('list', 'data', 'What to do?', list);
+        const choicer = new Choicer<string>('What to do?', list);
         const data = await select(choicer.inqSelectConfig);
 
         this.appManager.runApp(data)
@@ -158,7 +159,7 @@ class DockerManager extends CliManager {
 
     public async run(): Promise<void> {
         this.setEnvVariables();
-        const choicer = new Choicer<MainActions>('list', 'data', 'What to do?', Object.keys(MainActions) as MainActions[]);
+        const choicer = new Choicer<MainActions>('What to do?', Object.keys(MainActions) as MainActions[]);
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {

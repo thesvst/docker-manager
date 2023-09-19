@@ -1,7 +1,7 @@
 import { Choicer } from "./Choicer";
 import { CliManager } from "./CliManager";
 import { checkbox, select } from '@inquirer/prompts';
-import { ContainersRemoveActions, ContainersStartActions, ContainersStopActions } from "./types";
+import { ContainersRemoveActions, ContainersStartActions, ContainersStopActions } from "../types";
 
 export class ContainersManager extends CliManager {
 
@@ -12,7 +12,7 @@ export class ContainersManager extends CliManager {
     }
 
     public async start() {
-        const choicer = new Choicer<ContainersStartActions>('list', 'data', 'What to do?', Object.keys(ContainersStartActions) as ContainersStartActions[]);
+        const choicer = new Choicer<ContainersStartActions>('What to do?', Object.keys(ContainersStartActions) as ContainersStartActions[]);
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {
@@ -42,7 +42,7 @@ export class ContainersManager extends CliManager {
     }
 
     public async remove() {
-        const choicer = new Choicer<ContainersRemoveActions>('list', 'data', 'What to do?', Object.keys(ContainersRemoveActions) as ContainersRemoveActions[]);
+        const choicer = new Choicer<ContainersRemoveActions>('What to do?', Object.keys(ContainersRemoveActions) as ContainersRemoveActions[]);
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {
@@ -85,7 +85,7 @@ export class ContainersManager extends CliManager {
     }
 
     public async stop() {
-        const choicer = new Choicer<ContainersStopActions>('list', 'data', 'What to do?', Object.keys(ContainersStopActions) as ContainersStopActions[]);
+        const choicer = new Choicer<ContainersStopActions>('What to do?', Object.keys(ContainersStopActions) as ContainersStopActions[]);
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {

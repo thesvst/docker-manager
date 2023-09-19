@@ -14,6 +14,14 @@ This tool is designed to streamline the management of Docker.
    For each application name, define a variable in the `PREFIX_START_COMMAND` format. Here, "PREFIX" corresponds to the application name from `APP_NAMES`.
 
 ## How to use
+Install required packages by running
+```
+npm i
+```
+Build project
+```
+npm run build
+```
 Link the project using the command:
 ```
 npm link
