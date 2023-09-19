@@ -2,7 +2,10 @@ import { Choicer } from "./Choicer";
 import { CliManager } from "./CliManager";
 import { MainActions, ManageActions, ManageContainersActions, ManageImagesActions } from "./types";
 import os from 'os';
-import inquirer from 'inquirer';
+import { ContainersManager } from "./ContainersManager";
+import { ImagesManager } from "./ImagesManager";
+import { AppManager } from "./AppManager";
+import { select } from '@inquirer/prompts';
 
 class DockerManager extends CliManager {
     private async setEnvVariables() {
@@ -51,47 +54,49 @@ class DockerManager extends CliManager {
 
     private async manageContainers(): Promise<void> {
         const choicer = new Choicer<ManageContainersActions>('list', 'initial', 'What to do?', Object.keys(ManageContainersActions) as ManageContainersActions[]);
-        const { data } = await inquirer.prompt(choicer.config)
+        const data = await select(choicer.inqSelectConfig)
+        const containersManager = new ContainersManager();
 
         switch(data) {
-            case ManageContainersActions.Run: {
-                // TODO:
+            case ManageContainersActions.Start: {
+                await containersManager.start()
             }
             case ManageContainersActions.List: {
-                // TODO:
+                await containersManager.list()
             }
             case ManageContainersActions.Remove: {
-                // TODO:
+                await containersManager.remove()
             }
             case ManageContainersActions.Stop: {
-                // TODO:
+                await containersManager.stop()
             }
         }
     }
 
     private async manageImages(): Promise<void> {
         const choicer = new Choicer<ManageImagesActions>('list', 'initial', 'What to do?', Object.keys(ManageImagesActions) as ManageImagesActions[]);
-        const { data } = await inquirer.prompt(choicer.config)
+        const data = await select(choicer.inqSelectConfig)
+        const imagesManager = new ImagesManager();
 
         switch(data) {
-            case ManageImagesActions.Run: {
-                // TODO:
+            case ManageImagesActions.Start: {
+                await imagesManager.start()
             }
             case ManageImagesActions.List: {
-                // TODO:
+                await imagesManager.start()
             }
             case ManageImagesActions.Remove: {
-                // TODO:
+                await imagesManager.start()
             }
             case ManageImagesActions.Stop: {
-                // TODO:
+                await imagesManager.start()
             }
         }
     }
 
     private async manage(): Promise<void> {
         const choicer = new Choicer<ManageActions>('list', 'data', 'What to do?', Object.keys(ManageActions) as ManageActions[]);
-        const { data } = await inquirer.prompt(choicer.config)
+        const data = await select(choicer.inqSelectConfig)
 
         switch(data) {
             case ManageActions.Containers: {
@@ -105,7 +110,8 @@ class DockerManager extends CliManager {
     }
 
     private async runApp(): Promise<void> {
-        // TODO:
+        // const appManager = new AppManager();
+        
     }
 
     private async prune(): Promise<void> {
@@ -123,9 +129,7 @@ class DockerManager extends CliManager {
     }
 
     async selectFromList(message: string, choices: string[]) {
-        const { data } = await inquirer.prompt({
-            type: 'list', name: 'data', message, choices,
-        });
+        const data = await select({ message, choices: choices.map((choice) => ({ value: choice, message: choice})) })
         return data;
     }
 
@@ -142,7 +146,7 @@ class DockerManager extends CliManager {
     public async run(): Promise<void> {
         this.setEnvVariables();
         const choicer = new Choicer<MainActions>('list', 'data', 'What to do?', Object.keys(MainActions) as MainActions[]);
-        const { data } = await inquirer.prompt(choicer.config)
+        const data = await select(choicer.inqSelectConfig)
 
         switch(data) {
             case MainActions.RunApp: {
@@ -165,7 +169,7 @@ class DockerManager extends CliManager {
                 await this.prune();
             }
 
-            case MainActions: {
+            case MainActions.Exit: {
                 process.exit();
             }
             
