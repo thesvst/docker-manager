@@ -25,3 +25,19 @@ export enum ManageImagesActions {
     Start = 'Start',
     List = 'List'
 }
+
+export enum ContainersRemoveActions {
+    Stopped = 'Stopped',
+    Specific = 'Specific',
+    Running = 'Running'
+}
+
+export enum ContainersStopActions {
+    Specific = 'Specific',
+    Running = 'Running'
+}
+
+export enum ContainersStartActions {
+    Specific = 'Specific',
+    Stopped = 'Stopped'
+}
