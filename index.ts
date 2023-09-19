@@ -8,8 +8,9 @@ import { ImagesManager } from "./src/ImagesManager";
 import { AppManager } from "./src/AppManager";
 import { select } from '@inquirer/prompts';
 import dotenv from 'dotenv';
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 class DockerManager extends CliManager {
     private readonly containersManager: ContainersManager

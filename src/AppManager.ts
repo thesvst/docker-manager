@@ -1,5 +1,4 @@
 import { CliManager } from "./CliManager";
-
 export class AppManager extends CliManager {
     private readonly apps: string;
 
@@ -18,6 +17,4 @@ export class AppManager extends CliManager {
         const [command, ...args] = commandToRun.split(' ');
         await this.executeCommandWithOutput(command, args, true);
     }
-
-    
 }
