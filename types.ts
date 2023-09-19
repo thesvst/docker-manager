@@ -21,8 +21,6 @@ export enum ManageContainersActions {
 
 export enum ManageImagesActions {
     Remove = 'Remove',
-    Stop = 'Stop',
-    Start = 'Start',
     List = 'List'
 }
 
@@ -40,4 +38,10 @@ export enum ContainersStopActions {
 export enum ContainersStartActions {
     Specific = 'Specific',
     Stopped = 'Stopped'
+}
+
+export enum ImagesRemoveActions {
+    All = 'All',
+    Dangling = 'Dangling',
+    Specific = 'Specific'
 }

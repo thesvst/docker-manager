@@ -90,20 +90,12 @@ class DockerManager extends CliManager {
         const data = await select(choicer.inqSelectConfig)
 
         switch(data) {
-            case ManageImagesActions.Start: {
-                await this.imagesManager.start()
-                break;
-            }
             case ManageImagesActions.List: {
-                await this.imagesManager.start()
+                await this.imagesManager.list()
                 break;
             }
             case ManageImagesActions.Remove: {
-                await this.imagesManager.start()
-                break;
-            }
-            case ManageImagesActions.Stop: {
-                await this.imagesManager.start()
+                await this.imagesManager.remove()
                 break;
             }
         }
