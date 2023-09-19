@@ -6,15 +6,20 @@ import { ContainersManager } from "./ContainersManager";
 import { ImagesManager } from "./ImagesManager";
 import { AppManager } from "./AppManager";
 import { select } from '@inquirer/prompts';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 class DockerManager extends CliManager {
     private readonly containersManager: ContainersManager
     private readonly imagesManager: ImagesManager
+    private readonly appManager: AppManager
 
-    constructor(containersManager: ContainersManager, imagesManager: ImagesManager) {
+    constructor(containersManager: ContainersManager, imagesManager: ImagesManager, appManager: AppManager) {
         super();
         this.containersManager = containersManager;
         this.imagesManager = imagesManager;
+        this.appManager = appManager;
     }
 
     private async setEnvVariables() {
@@ -119,8 +124,11 @@ class DockerManager extends CliManager {
     }
 
     private async runApp(): Promise<void> {
-        // const appManager = new AppManager();
-        
+        const list = this.appManager.appNames;
+        const choicer = new Choicer<string>('list', 'data', 'What to do?', list);
+        const data = await select(choicer.inqSelectConfig);
+
+        this.appManager.runApp(data)
     }
 
     private async prune(): Promise<void> {
@@ -187,5 +195,5 @@ class DockerManager extends CliManager {
     }
 }
 
-const dockerManager = new DockerManager(new ContainersManager(), new ImagesManager());
+const dockerManager = new DockerManager(new ContainersManager(), new ImagesManager(), new AppManager());
 dockerManager.run();
