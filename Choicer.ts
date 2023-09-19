@@ -13,12 +13,10 @@ export class Choicer<T> {
         this.choices = choices;
     }
 
-    get config() {
+    get inqSelectConfig() {
         return {
-            type: this.type,
-            name: this.name,
             message: this.message,
-            choices: this.choices
+            choices: this.choices.map((choice) => ({ value: choice, message: choice }))
         }
     }
 }

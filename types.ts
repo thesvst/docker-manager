@@ -15,13 +15,13 @@ export enum ManageActions {
 export enum ManageContainersActions {
     Remove = 'Remove',
     Stop = 'Stop',
-    Run = 'Run',
+    Start = 'Start',
     List = 'List'
 }
 
 export enum ManageImagesActions {
     Remove = 'Remove',
     Stop = 'Stop',
-    Run = 'Run',
+    Start = 'Start',
     List = 'List'
 }
