@@ -12,9 +12,15 @@ export class AppManager extends CliManager {
     }
 
     public async runApp(name: string) {
-        const commandToRun = `newgrp docker <<EOL\n${process.env[`${name.toUpperCase()}_START_COMMAND`]}\nEOL`;
+        const envCommand = process.env[`${name.toUpperCase()}_START_COMMAND`];
 
-        const [command, ...args] = commandToRun.split(' ');
-        await this.executeCommandWithOutput(command, args, true);
+        if (envCommand?.includes('npm')) {
+            const commandToRun = `newgrp docker <<EOL\n${envCommand}\nEOL`;
+            const [command, ...args] = commandToRun.split(' ');
+            await this.executeCommandWithOutput(command, args, true);
+
+        } else if (envCommand) {
+            await this.executeCommandWithOutput(envCommand, [], true);
+        }
     }
 }
